@@ -94,6 +94,9 @@ class receive_path(gr.hier_block2):
 	normal.add_option("", "--overrate", type="intx",dest="overrate",
                           default=1,
                           help="set oversample rate [default=%default]")
+	normal.add_option("", "--downrate", type="intx",dest="downrate",
+                          default=4,
+                          help="set downsample rate [default=%default]")
         normal.add_option("-v", "--verbose", action="store_true", default=False)
         expert.add_option("", "--log", action="store_true", default=False,
                           help="Log all parts of flow graph to files (CAUTION: lots of data)")

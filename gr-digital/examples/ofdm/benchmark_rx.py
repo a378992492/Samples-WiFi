@@ -63,18 +63,24 @@ class my_top_block(gr.top_block):
 
 def main():
 
-    global n_rcvd, n_right
+    global n_rcvd, n_right,n_cbits,n_tbits
         
     n_rcvd = 0
     n_right = 0
+    n_cbits = 0
+    n_tbits = 0
 
-    def rx_callback(ok, payload):
-        global n_rcvd, n_right
+    def rx_callback(ok, payload,cbits,tbits):
+        global n_rcvd, n_right,n_cbits,n_tbits
         n_rcvd += 1
+	n_tbits+=tbits
+	n_cbits+=cbits
+	ber = float(100.0*float(n_tbits-n_cbits)/float(n_tbits))
+	print ber
         (pktno,) = struct.unpack('!H', payload[0:2])
         if ok:
             n_right += 1
-        print "ok: %r \t pktno: %d \t n_rcvd: %d \t n_right: %d" % (ok, pktno, n_rcvd, n_right)
+        print "ok: %r \t pktno: %d \t n_rcvd: %d \t n_right: %d\t ber:%.4f%%" % (ok, pktno, n_rcvd, n_right,ber)
 
         if 0:
             printlst = list()
