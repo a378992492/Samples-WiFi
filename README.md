@@ -1,2 +1,2 @@
-# HZL
-Projects for sampless WiFi,working in Gnuradio platform.
+# WiFi Teeter-Totter
+Projects for oversample WiFi,working in Gnuradio platform.
