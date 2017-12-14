@@ -169,19 +169,14 @@ d_fft_size(fft_size), d_forward(forward), d_shift(shift),d_overrate(overrate)
 
 	  for(int i=0;i<noutput_data;i++){
 	  	for(int j=0;j<d_overrate;j++){
-		   if((i%d_fft_size)<(d_fft_size/2)){
-	  		sum_temp += out_temp[j*noutput_data+i]*gr_expj(-(2*M_PI*((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate);
-			std::cout<<out_temp[j*noutput_data+i]<<"!";
-			//std::cout<<out_temp[j*noutput_data+i]*gr_expj(-(2*M_PI*((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate)<<"!";
-		   }else{
-			sum_temp +=out_temp[j*noutput_data+i]*gr_expj(-(2*M_PI*((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate);
-			std::cout<<out_temp[j*noutput_data+i]<<"?";
-			//std::cout<<out_temp[j*noutput_data+i]*gr_expj(-(2*M_PI*((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate)<<"?";
-		   }
+	  		if(abs(atan(out_temp[j*noutput_data+i].imag()/out_temp[j*noutput_data+i].real())-atan(out_temp[i].imag()/out_temp[i].real()))>M_PI/2){
+	  		sum_temp += out_temp[j*noutput_data+i]*gr_expj(-(2*M_PI*(int)((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate);
+			}else{sum_temp += out_temp[j*noutput_data+i]*gr_expj(-(2*M_PI*(int)((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate);}
+		
+		//std::cout<<(2*M_PI*(int)((i%d_fft_size)-d_fft_size/2)*j)/d_fft_size/d_overrate<<"!";
 	  	}out[i]=sum_temp/(gr_complex)d_overrate;
-		//std::cout<<out[i]<<"~";
 		sum_temp = 0;
-		if(i==128){throw std::runtime_error("allocata error");}
+		//if(i==128){throw std::runtime_error("allocata error");}
 		//std::cout<<"out:"<<out[i]<<"out_temp:"<<out_temp[i];
 
 	  }
