@@ -205,6 +205,7 @@ class ofdm_demod(gr.hier_block2):
         self._cp_length = options.cp_length
         self._snr = options.snr
 	self._overrate = options.overrate
+	self._downrate = options.downrate
 
         # Use freq domain to get doubled-up known symbol for correlation in time domain
         zeros_on_left = int(math.ceil((self._fft_length - self._occupied_tones)/2.0))
@@ -224,32 +225,33 @@ class ofdm_demod(gr.hier_block2):
 				       self._overrate,
                                        options.log)
 
-        mods = {"bpsk": 2, "qpsk": 4, "8psk": 8, "qam8": 8, "qam16": 16, "qam64": 64, "qam256": 256}
-        arity = mods[self._modulation]
+       # mods = {"bpsk": 2, "qpsk": 4, "8psk": 8, "qam8": 8, "qam16": 16, "qam64": 64, "qam256": 256}
+      #  arity = mods[self._modulation]
         
-        rot = 1
-        if self._modulation == "qpsk":
-            rot = (0.707+0.707j)
+       # rot = 1
+        #if self._modulation == "qpsk":
+         #   rot = (0.707+0.707j)
 
         # FIXME: pass the constellation objects instead of just the points
-        if(self._modulation.find("psk") >= 0):
-            constel = psk.psk_constellation(arity)
-            rotated_const = map(lambda pt: pt * rot, constel.points())
-        elif(self._modulation.find("qam") >= 0):
-            constel = qam.qam_constellation(arity)
-            rotated_const = map(lambda pt: pt * rot, constel.points())
+        #if(self._modulation.find("psk") >= 0):
+         #   constel = psk.psk_constellation(arity)
+          #  rotated_const = map(lambda pt: pt * rot, constel.points())
+        #elif(self._modulation.find("qam") >= 0):
+         #   constel = qam.qam_constellation(arity)
+          #  rotated_const = map(lambda pt: pt * rot, constel.points())
         #print rotated_const
 
-        phgain = 0.25
-        frgain = phgain*phgain / 4.0
-        self.ofdm_demod = digital.ofdm_frame_sink(rotated_const, range(arity),
-                                                  self._rcvd_pktq,
+        #phgain = 0.25
+        #frgain = phgain*phgain / 4.0
+        self.ofdm_demod = digital.ofdm_frame_ds_sink(self._fft_length,self._rcvd_pktq,
                                                   self._occupied_tones,
-                                                  phgain, frgain)
+                                                  self._modulation,0,
+                                                  self._downrate)
 
         self.connect(self, self.ofdm_recv)
         self.connect((self.ofdm_recv, 0), (self.ofdm_demod, 0))
         self.connect((self.ofdm_recv, 1), (self.ofdm_demod, 1))
+        self.connect((self.ofdm_recv, 2), (self.ofdm_demod, 2))
 
         # added output signature to work around bug, though it might not be a bad
         # thing to export, anyway
@@ -309,9 +311,9 @@ class _queue_watcher_thread(_threading.Thread):
     def run(self):
         while self.keep_running:
             msg = self.rcvd_pktq.delete_head()
-            ok, payload = ofdm_packet_utils.unmake_packet(msg.to_string())
+            ok, payload,cbits,tbits = ofdm_packet_utils.unmake_packet(msg.to_string())
             if self.callback:
-                self.callback(ok, payload)
+                self.callback(ok, payload, cbits, tbits)
 
 # Generating known symbols with:
 # i = [2*random.randint(0,1)-1 for i in range(4512)]

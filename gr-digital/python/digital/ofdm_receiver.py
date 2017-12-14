@@ -145,7 +145,7 @@ class ofdm_receiver(gr.hier_block2):
         self.sigmix = blocks.multiply_cc()
         self.sampler = digital.ofdm_oversampler(overrate,fft_length, fft_length+cp_length)
         self.fft_demod = gr_fft.demod_vcc(overrate,fft_length, True, win, True)
-        self.ofdm_frame_acq = digital.ofdm_frame_acquisition(occupied_tones,
+        self.ofdm_frame_acq = digital.ofdm_frame_ds_acquisition(occupied_tones,
                                                                   fft_length,
                                                                   cp_length, ks[0])
 
@@ -161,6 +161,7 @@ class ofdm_receiver(gr.hier_block2):
         self.connect((self.sampler,1), (self.ofdm_frame_acq,1))       # send timing signal to signal frame start
         self.connect((self.ofdm_frame_acq,0), (self,0))               # finished with fine/coarse freq correction,
         self.connect((self.ofdm_frame_acq,1), (self,1))               # frame and symbol timing, and equalization
+        self.connect((self.ofdm_frame_acq,2), (self,2)) 
 
         if logging:
             self.connect(self.chan_filt, blocks.file_sink(gr.sizeof_gr_complex, "ofdm_receiver-chan_filt_c.dat"))

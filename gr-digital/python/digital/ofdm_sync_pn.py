@@ -63,7 +63,7 @@ class ofdm_sync_pn(gr.hier_block2):
         self.corr = blocks.multiply_cc();
 
         #self.sub = blocks.add_const_ff(-1)
-        self.pk_detect = blocks.peak_detector_fb(0.40,0.25,fft_length*overrate,0.00001)
+        self.pk_detect = blocks.peak_detector_fb(0.40,0.25,fft_length*overrate,0.00000000000)
 
         self.connect(self,self.input)
         self.connect(self.input,self.crosscorr_filter)
